@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  taskqueue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: taskqueue:latest
+    container_name: taskqueue-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - taskqueue_wal:/data/wal
+    restart: unless-stopped
+    environment:
+      - WAL_DIR=/data/wal
+    healthcheck:
+      test: ["CMD", "/taskqueue", "-health-check"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  taskqueue_wal:
+    name: taskqueue_wal_data

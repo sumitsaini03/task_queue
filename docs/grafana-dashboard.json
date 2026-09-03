@@ -1,0 +1,268 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Queue Overview & Real-Time Depth",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 500 },
+              { "color": "red", "value": 2000 }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "id": 2,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "title": "Queue Depth",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "taskqueue_depth",
+          "legendFormat": "Queue Depth",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "orange", "value": 6 },
+              { "color": "red", "value": 8 }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "id": 3,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "title": "Busy Workers",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "taskqueue_worker_busy",
+          "legendFormat": "Busy Workers",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+      "id": 4,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "title": "Total Dead Letters (DLQ)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "taskqueue_dead_total",
+          "legendFormat": "DLQ Total",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          },
+          "unit": "ops"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+      "id": 5,
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "title": "Completion Rate",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "rate(taskqueue_completed_total[1m])",
+          "legendFormat": "Completed / sec",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 6,
+      "title": "Throughput & Failure Dynamics",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" },
+          "unit": "ops"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "id": 7,
+      "title": "Task Ingestion vs Execution (Rate/sec)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(taskqueue_enqueue_total[1m])",
+          "legendFormat": "Enqueue Rate",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(taskqueue_dequeue_total[1m])",
+          "legendFormat": "Dequeue Rate",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(taskqueue_completed_total[1m])",
+          "legendFormat": "Completed Rate",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" },
+          "unit": "ops"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+      "id": 8,
+      "title": "Errors, Retries & Dead Letters",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(taskqueue_failed_total[1m])",
+          "legendFormat": "Execution Failures",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(taskqueue_retry_total[1m])",
+          "legendFormat": "Retries Scheduled",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(taskqueue_dead_total[1m])",
+          "legendFormat": "Dead Letters (DLQ)",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+      "id": 9,
+      "title": "Latency Percentiles (p50 / p99)",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line" },
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 10,
+      "title": "Task Execution Duration (p50 & p99)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "taskqueue_execute_duration_p50_seconds",
+          "legendFormat": "p50 Execution Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "taskqueue_execute_duration_p99_seconds",
+          "legendFormat": "p99 Execution Latency",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line" },
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 11,
+      "title": "Enqueue Latency (p50 & p99)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "taskqueue_enqueue_duration_p50_seconds",
+          "legendFormat": "p50 Enqueue Latency",
+          "refId": "A"
+        },
+        {
+          "expr": "taskqueue_enqueue_duration_p99_seconds",
+          "legendFormat": "p99 Enqueue Latency",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["taskqueue", "golang", "concurrency", "performance"],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "TaskQueue Engine Dashboard",
+  "uid": "taskqueue-engine"
+}

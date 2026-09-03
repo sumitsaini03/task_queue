@@ -1,0 +1,12 @@
+.git
+.github
+bin/
+data/
+*.wal
+*.old
+*.tmp
+*.json
+*.out
+*.html
+.idea/
+.vscode/

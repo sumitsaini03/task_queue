@@ -1,0 +1,341 @@
+openapi: 3.0.3
+info:
+  title: TaskQueue API
+  description: High-performance, crash-resilient concurrent task queue with WAL persistence and priority scheduling.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /tasks:
+    post:
+      summary: Submit a task
+      description: Enqueues a new task for asynchronous execution. Appends to WAL before returning.
+      operationId: submitTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitTaskRequest'
+      responses:
+        '201':
+          description: Task accepted and enqueued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitTaskResponse'
+        '400':
+          description: Bad request (missing payload or invalid parameter)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict (duplicate idempotency key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many requests (rate limit exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service unavailable (queue capacity full)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tasks/{id}:
+    get:
+      summary: Get task status
+      description: Returns the current execution state, timing, and error history for a task.
+      operationId: getTask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task unique identifier
+          schema:
+            type: string
+            example: task_1772719200000000_1
+      responses:
+        '200':
+          description: Task status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Cancel a task
+      description: Cancels a pending or scheduled task. Running, completed, or dead tasks cannot be cancelled.
+      operationId: cancelTask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task unique identifier
+          schema:
+            type: string
+            example: task_1772719200000000_1
+      responses:
+        '200':
+          description: Task cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelTaskResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Cannot cancel task in its current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /dlq:
+    get:
+      summary: List Dead-Letter Queue
+      description: Returns paginated tasks that failed and exhausted all retry attempts.
+      operationId: listDLQ
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Maximum items to return
+          schema:
+            type: integer
+            default: 50
+            example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Pagination offset
+          schema:
+            type: integer
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Paginated DLQ entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DLQResponse'
+
+  /health:
+    get:
+      summary: Health check
+      description: Liveness probe checking server availability.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /stats:
+    get:
+      summary: Engine runtime statistics
+      description: Returns internal statistics for queue depth, worker count, WAL size, and DLQ size.
+      operationId: getStats
+      responses:
+        '200':
+          description: Engine statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineStats'
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns queue and worker metrics formatted for Prometheus scrapers.
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus exposition format text
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    SubmitTaskRequest:
+      type: object
+      required:
+        - payload
+      properties:
+        payload:
+          description: Arbitrary task payload (JSON object, string, or base64)
+          oneOf:
+            - type: string
+            - type: object
+          example:
+            action: send_email
+            recipient: user@example.com
+        priority:
+          type: integer
+          description: Higher priority tasks execute first in heap scheduling
+          default: 0
+          example: 1
+        delay_seconds:
+          type: integer
+          description: Delay in seconds before becoming eligible for execution
+          default: 0
+          example: 5
+        max_retries:
+          type: integer
+          description: Maximum retry attempts on execution failure
+          default: 5
+          example: 3
+        timeout_seconds:
+          type: integer
+          description: Per-execution timeout in seconds
+          default: 30
+          example: 10
+        idempotency_key:
+          type: string
+          description: Optional idempotency key to prevent duplicate processing
+          example: order_tx_98234
+
+    SubmitTaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: task_1772719200000000_1
+        state:
+          type: string
+          example: pending
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-03T13:00:00Z"
+
+    CancelTaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: task_1772719200000000_1
+        state:
+          type: string
+          example: cancelled
+        cancelled_at:
+          type: string
+          format: date-time
+          example: "2026-09-03T13:01:00Z"
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          example: task_1772719200000000_1
+        state:
+          type: string
+          enum: [pending, scheduled, running, retrying, completed, failed, dead, cancelled, expired]
+          example: running
+        payload:
+          description: Task data
+        priority:
+          type: integer
+          example: 0
+        retry_count:
+          type: integer
+          example: 0
+        max_retries:
+          type: integer
+          example: 5
+        last_error:
+          type: string
+          nullable: true
+          example: null
+        created_at:
+          type: string
+          format: date-time
+        scheduled_at:
+          type: string
+          format: date-time
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    DLQResponse:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        total:
+          type: integer
+          example: 1
+
+    EngineStats:
+      type: object
+      properties:
+        queue_depth:
+          type: integer
+          example: 0
+        delayed_depth:
+          type: integer
+          example: 0
+        active_workers:
+          type: integer
+          example: 8
+        busy_workers:
+          type: integer
+          example: 2
+        processed:
+          type: integer
+          example: 15420
+        failed:
+          type: integer
+          example: 12
+        wal_size:
+          type: integer
+          example: 2048576
+        wal_seq:
+          type: integer
+          example: 30840
+        dlq_size:
+          type: integer
+          example: 3
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: duplicate idempotency key
