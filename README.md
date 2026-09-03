@@ -1,11 +1,13 @@
 # TaskQueue — Concurrent Crash-Resilient Task Queue in Go
 
 [![CI & Security](https://github.com/sumitsaini/taskqueue/actions/workflows/ci.yml/badge.svg)](https://github.com/sumitsaini/taskqueue/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/sumitsaini/taskqueue)](https://goreportcard.com/report/github.com/sumitsaini/taskqueue)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/Go-1.24%20%7C%201.27-00ADD8?logo=go)](go.mod)
+[![Race Detector](https://img.shields.io/badge/Race%20Detector-Clean%20(0%20races)-success)](PROOF_OF_WORK.md)
 [![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0.3-brightgreen.svg)](docs/openapi.yaml)
+[![Proof of Work](https://img.shields.io/badge/Verified-Proof%20of%20Work-blueviolet)](PROOF_OF_WORK.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A production-grade, crash-resilient concurrent task queue built in Go with **zero external dependencies**. Engineered for single-node durability and extreme throughput, it pairs an in-memory ring-buffer (~**74.3M ops/sec**, 0 allocations) with a Castagnoli CRC32-C binary Write-Ahead Log (WAL), atomic snapshot checkpointing, min-heap delayed scheduling, exponential backoff retries with DLQ, token-bucket rate limiting, and native Prometheus exposition.
+A production-grade, crash-resilient concurrent task queue built in Go with **zero external dependencies**. Engineered for single-node durability and extreme throughput, it pairs an in-memory ring-buffer (~**74.3M ops/sec**, 0 allocations) with a Castagnoli CRC32-C binary Write-Ahead Log (WAL), atomic snapshot checkpointing, min-heap delayed scheduling, exponential backoff retries with DLQ, token-bucket rate limiting, and native Prometheus exposition. Full live verification outputs documented in [PROOF_OF_WORK.md](PROOF_OF_WORK.md).
 
 ---
 
