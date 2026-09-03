@@ -1,35 +1,56 @@
-# Binaries
+# Compiled Binaries & Build Output
+/bin/
+dist/
+build/
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+taskqueue
+taskqueue-linux
+server_bin*
 
-# Test binary
+# Test & Coverage Outputs
 *.test
-
-# Output of go coverage
 *.out
+coverage.txt
+coverage.html
+profile.pprof
 
-# Go workspace
+# Logs & Scratch Files
+*.log
+test_*.log
+*.tmp
+
+# Local Runtime & Persistence Data
+/data/
+*.wal
+*.bin
+*.old
+snapshot.json
+snapshot.tmp
+
+# Go Workspace & Dependencies
 go.work
 go.work.sum
-
-# Dependency directories
 vendor/
 
-# IDE
+# IDE & Editor Artifacts
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
+*.sublime-project
+*.sublime-workspace
 
-# OS
+# Operating System Metadata
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Build output
-/bin/
-
-# WAL data (local dev)
-/data/
+# Python / Node Toolchain Junk (if any scripts run)
+__pycache__/
+*.py[cod]
+node_modules/
