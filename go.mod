@@ -1,3 +1,3 @@
 module github.com/sumitsaini03/task_queue
 
-go 1.27.0
+go 1.24.0
