@@ -1,6 +1,6 @@
 # TaskQueue — Architectural Decisions & Interview Guide
 
-This guide provides deep technical defenses for the primary engineering decisions in `github.com/sumitsaini/taskqueue`. These notes are structured to explain the problem, alternatives evaluated, the chosen architecture, and the quantified trade-offs.
+This guide provides deep technical defenses for the primary engineering decisions in `github.com/sumitsaini03/task_queue`. These notes are structured to explain the problem, alternatives evaluated, the chosen architecture, and the quantified trade-offs.
 
 ---
 

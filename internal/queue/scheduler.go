@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/logger"
+	"github.com/sumitsaini03/task_queue/internal/logger"
 )
 
 const (

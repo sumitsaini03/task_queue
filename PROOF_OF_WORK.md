@@ -62,19 +62,19 @@ Every package tested with Go's race detector enabled:
 
 ```text
 $ go test -race -v -count=1 ./...
-ok      github.com/sumitsaini/taskqueue/cmd/server      (build verified)
-ok      github.com/sumitsaini/taskqueue/cmd/loadtest    (build verified)
-ok      github.com/sumitsaini/taskqueue/examples/client (build verified)
-ok      github.com/sumitsaini/taskqueue/internal/api    2.000s  (12 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/config 1.318s  (2 tests, 12 subtests passed)
-ok      github.com/sumitsaini/taskqueue/internal/engine 6.308s  (10 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/metrics 1.452s (4 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/queue  1.594s  (16 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/retry  1.368s  (4 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/wal    7.227s  (14 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/worker 1.495s  (6 tests passed)
-ok      github.com/sumitsaini/taskqueue/test            5.502s  (10 stress & failure tests passed)
-ok      github.com/sumitsaini/taskqueue/test/chaos      6.826s  (1 chaos recovery test passed)
+ok      github.com/sumitsaini03/task_queue/cmd/server      (build verified)
+ok      github.com/sumitsaini03/task_queue/cmd/loadtest    (build verified)
+ok      github.com/sumitsaini03/task_queue/examples/client (build verified)
+ok      github.com/sumitsaini03/task_queue/internal/api    2.000s  (12 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/config 1.318s  (2 tests, 12 subtests passed)
+ok      github.com/sumitsaini03/task_queue/internal/engine 6.308s  (10 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/metrics 1.452s (4 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/queue  1.594s  (16 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/retry  1.368s  (4 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/wal    7.227s  (14 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/worker 1.495s  (6 tests passed)
+ok      github.com/sumitsaini03/task_queue/test            5.502s  (10 stress & failure tests passed)
+ok      github.com/sumitsaini03/task_queue/test/chaos      6.826s  (1 chaos recovery test passed)
 ```
 
 **Result: 79 passed, 0 failed, 0 data races.**
@@ -88,7 +88,7 @@ To prove a stranger can clone this repository and get a working system in under 
 ### Commands Executed
 ```powershell
 $freshDir = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "taskqueue_fresh_" + [System.Guid]::NewGuid().ToString("N"))
-git clone "c:\Users\sumit saini\Desktop\queue_project" $freshDir
+git clone https://github.com/sumitsaini03/task_queue.git $freshDir
 cd $freshDir
 
 # Step 1: Build Binary
@@ -114,7 +114,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/metrics" -Method Get
 
 ### Raw Live Output
 ```text
-Cloning into 'C:\Users\...\Temp\taskqueue_fresh_d5cba58222db48b59499a97c4ea51363'...
+Cloning into 'taskqueue_fresh_d5cba58222db48b59499a97c4ea51363'...
 done.
 === Quickstart Step 1: Build Binary ===
 === Quickstart Step 2: Start Server ===
@@ -203,7 +203,7 @@ $ go test -v -count=1 ./test/chaos/...
     chaos_test.go:185: Chaos test passed: mid-write kill survived, state recovered, new traffic accepted seamlessly
 --- PASS: TestChaos_KillProcessMidWriteAndRecover (3.78s)
 PASS
-ok      github.com/sumitsaini/taskqueue/test/chaos      4.821s
+ok      github.com/sumitsaini03/task_queue/test/chaos      4.821s
 ```
 
 ---

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/config"
-	"github.com/sumitsaini/taskqueue/internal/engine"
-	"github.com/sumitsaini/taskqueue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/config"
+	"github.com/sumitsaini03/task_queue/internal/engine"
+	"github.com/sumitsaini03/task_queue/internal/queue"
 )
 
 func newTestEngine(t *testing.T, workers, capacity int, handler func(ctx context.Context, task *queue.Task) error) (*engine.Engine, config.Config) {

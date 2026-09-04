@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/queue"
 )
 
 func makeTask(id string) *queue.Task {

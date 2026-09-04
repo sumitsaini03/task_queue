@@ -1,6 +1,6 @@
 # TaskQueue — Concurrent Crash-Resilient Task Queue in Go
 
-[![CI & Security](https://github.com/sumitsaini/taskqueue/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
+[![CI & Security](https://github.com/sumitsaini03/task_queue/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
 [![Go Version](https://img.shields.io/badge/Go-1.24%20%7C%201.27-00ADD8?logo=go)](go.mod)
 [![Race Detector](https://img.shields.io/badge/Race%20Detector-Clean%20(0%20races)-success)](PROOF_OF_WORK.md)
 [![OpenAPI 3.0](https://img.shields.io/badge/OpenAPI-3.0.3-brightgreen.svg)](docs/openapi.yaml)

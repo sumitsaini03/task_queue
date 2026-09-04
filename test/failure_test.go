@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/config"
-	"github.com/sumitsaini/taskqueue/internal/engine"
-	"github.com/sumitsaini/taskqueue/internal/queue"
-	"github.com/sumitsaini/taskqueue/internal/retry"
-	"github.com/sumitsaini/taskqueue/internal/wal"
+	"github.com/sumitsaini03/task_queue/internal/config"
+	"github.com/sumitsaini03/task_queue/internal/engine"
+	"github.com/sumitsaini03/task_queue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/retry"
+	"github.com/sumitsaini03/task_queue/internal/wal"
 )
 
 // TestFailure_CrashAndDeterministicRecovery simulates an abrupt crash where the

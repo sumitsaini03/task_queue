@@ -12,12 +12,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/api"
-	"github.com/sumitsaini/taskqueue/internal/config"
-	"github.com/sumitsaini/taskqueue/internal/engine"
-	"github.com/sumitsaini/taskqueue/internal/logger"
-	"github.com/sumitsaini/taskqueue/internal/queue"
-	"github.com/sumitsaini/taskqueue/internal/worker"
+	"github.com/sumitsaini03/task_queue/internal/api"
+	"github.com/sumitsaini03/task_queue/internal/config"
+	"github.com/sumitsaini03/task_queue/internal/engine"
+	"github.com/sumitsaini03/task_queue/internal/logger"
+	"github.com/sumitsaini03/task_queue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/worker"
 )
 
 func main() {

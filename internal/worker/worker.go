@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/logger"
-	"github.com/sumitsaini/taskqueue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/logger"
+	"github.com/sumitsaini03/task_queue/internal/queue"
 )
 
 // HandlerFunc is the function signature for task execution.

@@ -12,13 +12,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/config"
-	"github.com/sumitsaini/taskqueue/internal/logger"
-	"github.com/sumitsaini/taskqueue/internal/metrics"
-	"github.com/sumitsaini/taskqueue/internal/queue"
-	"github.com/sumitsaini/taskqueue/internal/retry"
-	"github.com/sumitsaini/taskqueue/internal/wal"
-	"github.com/sumitsaini/taskqueue/internal/worker"
+	"github.com/sumitsaini03/task_queue/internal/config"
+	"github.com/sumitsaini03/task_queue/internal/logger"
+	"github.com/sumitsaini03/task_queue/internal/metrics"
+	"github.com/sumitsaini03/task_queue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/retry"
+	"github.com/sumitsaini03/task_queue/internal/wal"
+	"github.com/sumitsaini03/task_queue/internal/worker"
 )
 
 // Engine errors

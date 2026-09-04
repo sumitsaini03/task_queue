@@ -103,7 +103,7 @@ go test -v -count=1 ./test/chaos/...
     chaos_test.go:185: Chaos test passed: mid-write kill survived, state recovered, new traffic accepted seamlessly
 --- PASS: TestChaos_KillProcessMidWriteAndRecover (3.66s)
 PASS
-ok      github.com/sumitsaini/taskqueue/test/chaos      4.578s
+ok      github.com/sumitsaini03/task_queue/test/chaos      4.578s
 ```
 
 ### Guarantees Proved

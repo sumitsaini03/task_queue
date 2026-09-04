@@ -14,9 +14,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/engine"
-	"github.com/sumitsaini/taskqueue/internal/logger"
-	"github.com/sumitsaini/taskqueue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/engine"
+	"github.com/sumitsaini03/task_queue/internal/logger"
+	"github.com/sumitsaini03/task_queue/internal/queue"
 )
 
 // Server holds the HTTP server and its dependencies.

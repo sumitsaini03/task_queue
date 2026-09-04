@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/config"
-	"github.com/sumitsaini/taskqueue/internal/queue"
-	"github.com/sumitsaini/taskqueue/internal/worker"
+	"github.com/sumitsaini03/task_queue/internal/config"
+	"github.com/sumitsaini03/task_queue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/worker"
 )
 
 func testConfig(t *testing.T) config.Config {

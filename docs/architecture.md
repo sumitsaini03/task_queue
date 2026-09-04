@@ -2,7 +2,7 @@
 
 ## 1. System Overview
 
-`github.com/sumitsaini/taskqueue` is a production-grade, crash-resilient, concurrent task queue implemented in Go with zero external runtime dependencies. It combines in-memory ring-buffer performance with single-node durability guaranteed by a binary write-ahead log (WAL) and checkpointing.
+`github.com/sumitsaini03/task_queue` is a production-grade, crash-resilient, concurrent task queue implemented in Go with zero external runtime dependencies. It combines in-memory ring-buffer performance with single-node durability guaranteed by a binary write-ahead log (WAL) and checkpointing.
 
 ```
                          HTTP API Layer (:8080)

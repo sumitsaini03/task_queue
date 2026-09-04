@@ -1,6 +1,6 @@
 # Project Walkthrough — Full Architecture & Completion (Phases 1–20)
 
-**Project:** `github.com/sumitsaini/taskqueue`  
+**Project:** `github.com/sumitsaini03/task_queue`  
 **Version:** `v1.0.0`  
 **Language:** Go (1.27.0)  
 **External Runtime Dependencies:** None (Zero dependencies)  
@@ -51,17 +51,17 @@ TaskQueue is an engineering demonstration of OS-level concurrency, crash durabil
 
 ### All Tests with Race Detector (`go test -race -v ./...`)
 ```text
-ok      github.com/sumitsaini/taskqueue/cmd/server      (build verified)
-ok      github.com/sumitsaini/taskqueue/internal/api    2.000s  (12 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/config 1.318s  (2 tests, 12 subtests passed)
-ok      github.com/sumitsaini/taskqueue/internal/engine 6.308s  (10 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/metrics 1.452s (4 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/queue  1.594s  (16 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/retry  1.368s  (4 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/wal    7.227s  (14 tests passed)
-ok      github.com/sumitsaini/taskqueue/internal/worker 1.495s  (6 tests passed)
-ok      github.com/sumitsaini/taskqueue/test            5.356s  (10 stress & failure tests passed)
-ok      github.com/sumitsaini/taskqueue/test/chaos      4.578s  (1 chaos test passed)
+ok      github.com/sumitsaini03/task_queue/cmd/server      (build verified)
+ok      github.com/sumitsaini03/task_queue/internal/api    2.000s  (12 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/config 1.318s  (2 tests, 12 subtests passed)
+ok      github.com/sumitsaini03/task_queue/internal/engine 6.308s  (10 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/metrics 1.452s (4 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/queue  1.594s  (16 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/retry  1.368s  (4 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/wal    7.227s  (14 tests passed)
+ok      github.com/sumitsaini03/task_queue/internal/worker 1.495s  (6 tests passed)
+ok      github.com/sumitsaini03/task_queue/test            5.356s  (10 stress & failure tests passed)
+ok      github.com/sumitsaini03/task_queue/test/chaos      4.578s  (1 chaos test passed)
 ```
 **Total: 79 tests. Zero data races detected.**
 

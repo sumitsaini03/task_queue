@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sumitsaini/taskqueue/internal/config"
-	"github.com/sumitsaini/taskqueue/internal/queue"
-	"github.com/sumitsaini/taskqueue/internal/wal"
+	"github.com/sumitsaini03/task_queue/internal/config"
+	"github.com/sumitsaini03/task_queue/internal/queue"
+	"github.com/sumitsaini03/task_queue/internal/wal"
 )
 
 func BenchmarkEngine_Submit(b *testing.B) {
