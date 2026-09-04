@@ -5,10 +5,10 @@ package worker
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
+	"github.com/sumitsaini/taskqueue/internal/logger"
 	"github.com/sumitsaini/taskqueue/internal/queue"
 )
 
@@ -73,7 +73,7 @@ func (p *Pool) worker(ctx context.Context, id int) {
 		// Check context before blocking on dequeue
 		select {
 		case <-ctx.Done():
-			log.Printf("worker %d: context cancelled, stopping", id)
+			logger.Debug("worker: context cancelled, stopping", "worker_id", id)
 			return
 		default:
 		}
@@ -82,7 +82,7 @@ func (p *Pool) worker(ctx context.Context, id int) {
 		task, err := p.buffer.Dequeue()
 		if err != nil {
 			// Buffer closed and drained — clean exit
-			log.Printf("worker %d: buffer closed, stopping", id)
+			logger.Debug("worker: buffer closed, stopping", "worker_id", id)
 			return
 		}
 
@@ -120,7 +120,7 @@ func (p *Pool) worker(ctx context.Context, id int) {
 			if execErr != nil {
 				task.ForceSetState(queue.TaskStateFailed)
 				task.LastError = execErr.Error()
-				log.Printf("worker %d: task %s failed: %v", id, task.ID, execErr)
+				logger.Warn("worker: task execution failed", "worker_id", id, "task_id", task.ID, "error", execErr)
 			} else {
 				task.ForceSetState(queue.TaskStateCompleted)
 				task.CompletedAt = time.Now()

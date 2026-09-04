@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 	"time"
@@ -128,7 +127,7 @@ func (e *Engine) Recover() error {
 				e.idempKeys[task.IdempotencyKey] = task.ID
 			}
 		}
-		log.Printf("engine: loaded snapshot with %d tasks at seq %d", len(snap.Tasks), snapSeq)
+		logger.Info("engine: loaded snapshot", "task_count", len(snap.Tasks), "last_seq", snapSeq)
 	}
 
 	// 2. Replay WAL entries after snapshot
@@ -156,7 +155,7 @@ func (e *Engine) Recover() error {
 	// 4. Rebuild queue state from recovered tasks
 	e.rebuildQueues()
 
-	log.Printf("engine: recovery complete — %d tasks recovered, WAL seq %d", len(e.tasks), lastSeq)
+	logger.Info("engine: recovery complete", "recovered_tasks", len(e.tasks), "last_wal_seq", lastSeq)
 	return nil
 }
 
@@ -221,7 +220,7 @@ func (e *Engine) Shutdown(timeout time.Duration) error {
 	// Final checkpoint
 	if e.walLog != nil {
 		if err := e.checkpoint(); err != nil {
-			log.Printf("engine: final checkpoint error: %v", err)
+			logger.Error("engine: final checkpoint failed", "error", err)
 		}
 	}
 
@@ -461,7 +460,7 @@ func (e *Engine) wrapHandler(userHandler worker.HandlerFunc) worker.HandlerFunc 
 			Type:   wal.EntryStart,
 			TaskID: task.ID,
 		}); err != nil {
-			log.Printf("engine: WAL start entry failed for %s: %v", task.ID, err)
+			logger.Error("engine: WAL start entry failed", "task_id", task.ID, "error", err)
 		}
 
 		e.metricCollector.RecordDequeue()
@@ -510,7 +509,7 @@ func (e *Engine) handleSuccess(task *queue.Task) error {
 		Type:   wal.EntryComplete,
 		TaskID: task.ID,
 	}); err != nil {
-		log.Printf("engine: WAL complete entry failed for %s: %v", task.ID, err)
+		logger.Error("engine: WAL complete entry failed", "task_id", task.ID, "error", err)
 	}
 
 	e.metricsMu.Lock()
@@ -543,7 +542,7 @@ func (e *Engine) handleFailure(task *queue.Task, execErr error) error {
 			TaskID: task.ID,
 			Data:   []byte(execErr.Error()),
 		}); err != nil {
-			log.Printf("engine: WAL dead entry failed for %s: %v", task.ID, err)
+			logger.Error("engine: WAL dead entry failed", "task_id", task.ID, "error", err)
 		}
 
 		e.dlqMu.Lock()
@@ -577,7 +576,7 @@ func (e *Engine) handleFailure(task *queue.Task, execErr error) error {
 		TaskID: task.ID,
 		Data:   retryData,
 	}); err != nil {
-		log.Printf("engine: WAL retry entry failed for %s: %v", task.ID, err)
+		logger.Error("engine: WAL retry entry failed", "task_id", task.ID, "error", err)
 	}
 
 	// Re-enqueue via delayed heap
@@ -669,7 +668,7 @@ func (e *Engine) rebuildQueues() {
 		case queue.TaskStatePending:
 			// Re-enqueue into ring buffer
 			if err := e.buffer.Enqueue(task); err != nil {
-				log.Printf("engine: recovery: failed to re-enqueue task %s: %v", task.ID, err)
+				logger.Error("engine: recovery re-enqueue failed", "task_id", task.ID, "error", err)
 			}
 
 		case queue.TaskStateScheduled:
@@ -682,7 +681,7 @@ func (e *Engine) rebuildQueues() {
 			task.ForceSetState(queue.TaskStatePending)
 			task.RetryCount++
 			if err := e.buffer.Enqueue(task); err != nil {
-				log.Printf("engine: recovery: failed to re-enqueue running task %s: %v", task.ID, err)
+				logger.Error("engine: recovery re-enqueue running task failed", "task_id", task.ID, "error", err)
 			}
 		}
 		// Completed, Dead, Cancelled, Failed tasks stay in registry but aren't re-queued
@@ -700,7 +699,7 @@ func (e *Engine) checkpointLoop() {
 			return
 		case <-ticker.C:
 			if err := e.checkpoint(); err != nil {
-				log.Printf("engine: checkpoint error: %v", err)
+				logger.Error("engine: checkpoint failed", "error", err)
 			}
 		}
 	}
@@ -728,7 +727,7 @@ func (e *Engine) checkpoint() error {
 		return fmt.Errorf("rotate WAL: %w", err)
 	}
 
-	log.Printf("engine: checkpoint complete — %d tasks, seq %d", len(snap.Tasks), snap.LastSeq)
+	logger.Info("engine: checkpoint complete", "task_count", len(snap.Tasks), "last_seq", snap.LastSeq)
 	return nil
 }
 

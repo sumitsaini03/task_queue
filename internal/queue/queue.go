@@ -5,6 +5,7 @@ package queue
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -31,6 +32,7 @@ const (
 	TaskStateExpired                    // Expired before execution
 )
 
+// String returns the string representation of the task state.
 func (s TaskState) String() string {
 	switch s {
 	case TaskStatePending:
@@ -107,7 +109,7 @@ func (t *Task) SetState(next TaskState) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	if !t.State.CanTransitionTo(next) {
-		return errors.New("cannot transition from " + t.State.String() + " to " + next.String())
+		return fmt.Errorf("%w: cannot transition from %s to %s", ErrInvalidTransition, t.State, next)
 	}
 	t.State = next
 	return nil

@@ -2,8 +2,9 @@ package queue
 
 import (
 	"context"
-	"log"
 	"time"
+
+	"github.com/sumitsaini/taskqueue/internal/logger"
 )
 
 const (
@@ -53,7 +54,7 @@ func (s *Scheduler) Run(ctx context.Context) {
 				continue
 			}
 			if err := s.buffer.Enqueue(t); err != nil {
-				log.Printf("scheduler: failed to enqueue task %s: %v", t.ID, err)
+				logger.Warn("scheduler: failed to enqueue task", "task_id", t.ID, "error", err)
 				// If the buffer is closed, we should stop
 				if err == ErrQueueClosed {
 					return

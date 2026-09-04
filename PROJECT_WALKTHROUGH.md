@@ -4,48 +4,53 @@
 **Version:** `v1.0.0`  
 **Language:** Go (1.27.0)  
 **External Runtime Dependencies:** None (Zero dependencies)  
+**Verification Record:** [PROOF_OF_WORK.md](PROOF_OF_WORK.md)  
+**Portfolio Positioning:** [context.md](context.md)  
 
 ---
 
-## 1. Summary of Changes (Phases 16–20)
+## 1. Portfolio Role & Architecture Overview
 
-### Phase 16: Containerization & CI
-* **Multi-Stage Dockerfile (`Dockerfile`):** Built static CGO_ENABLED=0 binary with stripped symbols (`-s -w -extldflags '-static'`) running on `gcr.io/distroless/static-debian12:nonroot`. Stripped binary size: **7.0 MB**; final container image size: **~9.5 MB**.
-* **Docker Compose (`docker-compose.yml`):** Multi-container spec mapping port `8080` with named persistent volume `taskqueue_wal:/data/wal` and health checks.
-* **GitHub Actions Workflow (`.github/workflows/ci.yml`):** Runs on all pushes and PRs: `gofmt -l` check (fails build if any file unformatted), `go vet`, `staticcheck`, `govulncheck` (0 vulnerabilities), `gosec` (0 security issues), `go test -race`, and Docker build.
-* **Healthcheck CLI Flag:** Added `-healthcheck` flag to `cmd/server/main.go` allowing distroless environments to query server liveness directly.
+TaskQueue is an engineering demonstration of OS-level concurrency, crash durability, and single-node production hardening. It is designed to sit behind backend job processing tiers (equivalent to Celery, Sidekiq, or Bull) built from the ground up without third-party queue or database packages.
 
-### Phase 17: API Contract & Docs
-* **OpenAPI 3.0.3 Specification (`docs/openapi.yaml`):** Fully compliant specification matching `docs/api-contract.md` (all 6 endpoints, query params, schemas, and status codes). Validated syntax.
-* **Skimming-Friendly README (`README.md`):** One-paragraph elevator pitch, ASCII architecture diagram, 5-minute quickstart, benchmark table, and deep documentation links.
-* **Examples Directory (`examples/`):**
-  * Minimal Go client (`examples/client/main.go`) using standard `net/http` to submit, poll, delay, and query metrics.
-  * Interactive bash walkthrough (`examples/walkthrough.sh`) and PowerShell walkthrough (`examples/walkthrough.ps1`).
-* **Interview Defense Guide (`docs/interview-guide.md`):** Deep technical defenses for WAL framing layout, min-heap scheduler vs ticker polling, state machine concurrency isolation, and ring buffer with `sync.Cond` vs channels.
-
-### Phase 18: Observability Polish
-* **Grafana Dashboard JSON (`docs/grafana-dashboard.json`):** 11 dark-themed panels graphing real-time queue depth, active worker utilization, throughput rates (enqueue/dequeue/complete), failure/retry dynamics, and p50/p99 latency percentiles.
-* **Structured JSON Logging (`internal/logger/logger.go`):** Implemented using Go standard library `log/slog`.
-* **Traceable Request Lifecycle:** Threaded `X-Request-ID` from HTTP middleware through task submission, execution, and worker completion. Grepping a single task ID shows its full chronological timeline.
-* **Observability Documentation (`docs/observability.md`):** Documented metrics catalog, healthy baselines, PromQL queries, and log tracing guide.
-
-### Phase 19: Load & Chaos Testing
-* **HTTP API Load Testing CLI (`cmd/loadtest/main.go`):** Built standalone concurrent benchmark tool reporting sustained throughput (req/sec) and latency percentiles (min, p50, p90, p99, max).
-* **Saturation Results:** **6,550.7 req/sec sustained throughput** over HTTP TCP sockets with **4.59 ms median latency** (p50) and **8.70 ms 99th percentile latency** (p99) with 0 errors across 5,000 requests.
-* **K6 Script (`test/load/k6_script.js`):** Script with staged virtual users and latency thresholds.
-* **External Process Chaos Test (`test/chaos/chaos_test.go`):** Spawns compiled OS server binary, hammers concurrent writes, violently kills the process mid-write (`SIGKILL`), restarts from the same WAL directory, verifies `/health` 200 OK, verifies 100% of acknowledged tasks recovered, and verifies seamless acceptance of new traffic.
-* **Load Testing Guide (`docs/load-testing.md`):** Full reproducibility guide with exact commands and outputs.
-
-### Phase 20: Resume Packaging
-* **Tag & Release Notes:** Tagged `v1.0.0` with comprehensive `RELEASE_NOTES.md`.
-* **Resume Bullet Points:** Quantified, interview-defensible bullet points following "what you built -> nontrivial technical decision -> quantified result".
+### Portfolio Placement
+* **CodePilot / DevPilot:** Service architecture, RAG, multi-agent orchestration.
+* **Distributed KV Store:** Distributed systems theory, Raft consensus, leader election.
+* **Concurrent Task Queue:** OS-level concurrency, thread-safe memory models, Write-Ahead Logging (WAL), crash recovery.
 
 ---
 
-## 2. Complete Verification Results
+## 2. Complete Phase-by-Phase Implementation History (Phases 1–20)
+
+| Phase | Milestone Name | Key Technical Decisions & Deliverables |
+| :---: | :--- | :--- |
+| **Phase 1** | **Core Ring Buffer Queue** | Hand-rolled pre-allocated circular buffer (`internal/queue/ring.go`). Zero heap allocations (`0 B/op`) in hot path; clocking 74.3M ops/sec. |
+| **Phase 2** | **Min-Heap Delayed Scheduler** | $O(\log N)$ priority min-heap (`internal/queue/heap.go`) with precise timer sleep and dynamic wake channel on earlier insertion. |
+| **Phase 3** | **Binary WAL Framing** | Binary log (`internal/wal/wal.go`) with magic header (`0xAA4C`), sequence monotonic IDs, and Castagnoli CRC32-C verification. |
+| **Phase 4** | **Snapshot Checkpointing** | Periodic atomic state serialization (`internal/wal/snapshot.go`) with temporary file rename, bounding replay time. |
+| **Phase 5** | **Crash Recovery & Replay** | Idempotent startup replay restoring snapshot baseline plus uncompacted WAL tail; surviving torn writes at EOF. |
+| **Phase 6** | **Worker Pool Concurrency** | Fixed goroutine pool (`internal/worker/pool.go`) with `sync.Cond` blocking and context cancellation drain. |
+| **Phase 7** | **Task State Machine** | Strict state transition table with `sync.RWMutex` isolation preventing race clobbering across workers and API calls. |
+| **Phase 8** | **Retry with Full Jitter** | Exponential backoff with randomized full jitter (`internal/retry/backoff.go`) mitigating thundering herd stampedes. |
+| **Phase 9** | **Dead Letter Queue (DLQ)** | Automated quarantine for tasks exceeding max retries, complete with inspection and replay capabilities. |
+| **Phase 10** | **Idempotency Registry** | Deduplication registry preventing duplicate submissions of active and scheduled tasks. |
+| **Phase 11** | **REST HTTP API** | Hand-rolled HTTP router (`internal/api/server.go`) covering `/tasks`, `/tasks/{id}`, `/tasks/{id}/cancel`, `/dlq`, and `/metrics`. |
+| **Phase 12** | **Token-Bucket Rate Limiter** | In-memory token bucket limiter (`internal/api/limiter.go`) enforcing burst limits and returning HTTP 503 on queue saturation. |
+| **Phase 13** | **Prometheus Instrumentation**| Native Prometheus exposition format (`internal/metrics/metrics.go`) without external prometheus client library. |
+| **Phase 14** | **Structured JSON Logging** | Standard library `log/slog` integration with correlated request and task identifiers (`X-Request-ID`). |
+| **Phase 15** | **Concurrency & Race Hardening**| Stress testing with 32 concurrent producers and 16 workers, achieving 0 data races under Go's race detector. |
+| **Phase 16** | **Containerization & CI** | Multi-stage Dockerfile (`gcr.io/distroless/static-debian12:nonroot`) generating ~9.5 MB image; GitHub Actions CI pipeline. |
+| **Phase 17** | **API Contract & Documentation**| OpenAPI 3.0.3 specification (`docs/openapi.yaml`), interactive PowerShell/Bash walkthroughs, and interview guide. |
+| **Phase 18** | **Observability Polish** | 11-panel Grafana dashboard JSON (`docs/grafana-dashboard.json`) and observability documentation (`docs/observability.md`). |
+| **Phase 19** | **Load & Chaos Verification** | HTTP saturation load test CLI (`cmd/loadtest/main.go`) achieving 6,550 req/sec; violent `SIGKILL` mid-write chaos tests. |
+| **Phase 20** | **Release & Resume Packaging** | Tagged `v1.0.0`, verified resume bullet points, empirical benchmarks, and proof of work documentation. |
+
+---
+
+## 3. Complete Verification Results
 
 ### All Tests with Race Detector (`go test -race -v ./...`)
-```
+```text
 ok      github.com/sumitsaini/taskqueue/cmd/server      (build verified)
 ok      github.com/sumitsaini/taskqueue/internal/api    2.000s  (12 tests passed)
 ok      github.com/sumitsaini/taskqueue/internal/config 1.318s  (2 tests, 12 subtests passed)
@@ -67,7 +72,10 @@ ok      github.com/sumitsaini/taskqueue/test/chaos      4.578s  (1 chaos test pa
 * `govulncheck ./...`: Clean exit 0 (zero known vulnerabilities).
 * `gosec -exclude=G104 ./...`: Clean exit 0 (zero security issues).
 
-### Performance Summary
+---
+
+## 4. Performance Summary
+
 | Subsystem | Metric | Verified Value |
 | :--- | :--- | :--- |
 | **In-Memory Ring Buffer** | Enqueue + Dequeue (1-thread) | **74.3M ops/sec** (16.83 ns/op, 0 allocs) |
@@ -79,3 +87,12 @@ ok      github.com/sumitsaini/taskqueue/test/chaos      4.578s  (1 chaos test pa
 | **WAL Recovery Speed** | Full state rebuild | **~164,000 tasks/sec** (6.09 ms / 1k tasks) |
 | **Network HTTP Throughput** | 32 concurrent HTTP workers | **6,550.7 req/sec** (p50: 4.6ms, p99: 8.7ms) |
 | **Container Size** | Distroless static runtime | **~9.5 MB** (binary: 7.0 MB) |
+
+---
+
+## 5. Post-MVP Stretch Goals (Future Scope)
+
+The following optional stretch goals are documented for post-v1.0.0 exploration:
+1. **Lock-Free Ring Buffer Variant:** Benchmark a lock-free CAS-based ring buffer against the current mutex + `sync.Cond` implementation to compare contention profiles.
+2. **Work-Stealing Across Worker Pools:** Partition workers into per-core queues with work-stealing dequeues to minimize lock contention on high core-count systems.
+3. **gRPC Transport Layer:** Expose protobuf/gRPC endpoints alongside the existing REST HTTP interface.

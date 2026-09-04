@@ -1,9 +1,10 @@
+// Package main implements the taskqueue server daemon entrypoint.
 package main
 
 import (
 	"context"
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,12 +15,13 @@ import (
 	"github.com/sumitsaini/taskqueue/internal/api"
 	"github.com/sumitsaini/taskqueue/internal/config"
 	"github.com/sumitsaini/taskqueue/internal/engine"
+	"github.com/sumitsaini/taskqueue/internal/logger"
 	"github.com/sumitsaini/taskqueue/internal/queue"
 	"github.com/sumitsaini/taskqueue/internal/worker"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
+	logger.Init(slog.LevelInfo)
 
 	healthCheck := flag.Bool("healthcheck", false, "Query health endpoint and exit with code 0 if healthy")
 	flag.Parse()
@@ -27,7 +29,8 @@ func main() {
 	// Load configuration (including environment variable overrides)
 	cfg := config.Load()
 	if err := cfg.Validate(); err != nil {
-		log.Fatalf("invalid config: %v", err)
+		logger.Error("invalid configuration", "error", err)
+		os.Exit(1)
 	}
 
 	if *healthCheck {
@@ -46,12 +49,14 @@ func main() {
 	// Create engine
 	eng, err := engine.New(cfg)
 	if err != nil {
-		log.Fatalf("engine init: %v", err)
+		logger.Error("engine initialization failed", "error", err)
+		os.Exit(1)
 	}
 
 	// Recover from WAL + snapshot
 	if err := eng.Recover(); err != nil {
-		log.Fatalf("recovery failed: %v", err)
+		logger.Error("recovery failed", "error", err)
+		os.Exit(1)
 	}
 
 	// Default task handler — echoes payload
@@ -77,26 +82,27 @@ func main() {
 
 	go func() {
 		if err := apiServer.Start(); err != nil {
-			log.Fatalf("api server error: %v", err)
+			logger.Error("api server error", "error", err)
+			os.Exit(1)
 		}
 	}()
 
-	log.Printf("taskqueue server started on %s", cfg.HTTP.Addr)
+	logger.Info("taskqueue server started", "addr", cfg.HTTP.Addr)
 
 	// Wait for shutdown signal
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-sigCh
-	log.Printf("received %v, starting graceful shutdown...", sig)
+	logger.Info("received signal, starting graceful shutdown", "signal", sig.String())
 
 	// Shutdown sequence: HTTP → Engine (workers → WAL)
 	if err := apiServer.Shutdown(cfg.HTTP.ShutdownTimeout); err != nil {
-		log.Printf("api shutdown error: %v", err)
+		logger.Error("api shutdown error", "error", err)
 	}
 
 	if err := eng.Shutdown(cfg.HTTP.ShutdownTimeout); err != nil {
-		log.Printf("engine shutdown error: %v", err)
+		logger.Error("engine shutdown error", "error", err)
 	}
 
-	log.Println("server stopped cleanly")
+	logger.Info("server stopped cleanly")
 }

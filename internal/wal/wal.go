@@ -82,6 +82,7 @@ const (
 	EntrySnapshot                      // Snapshot marker
 )
 
+// String returns the string representation of EntryType.
 func (e EntryType) String() string {
 	switch e {
 	case EntryEnqueue:

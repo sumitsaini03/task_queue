@@ -13,12 +13,6 @@ import (
 	"time"
 )
 
-type Result struct {
-	Duration time.Duration
-	Status   int
-	Err      error
-}
-
 func main() {
 	targetURL := flag.String("url", "http://localhost:8080/tasks", "Target HTTP API URL")
 	concurrency := flag.Int("c", 32, "Concurrent worker routines")

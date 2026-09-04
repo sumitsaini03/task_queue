@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -103,7 +102,7 @@ func NewServer(eng *engine.Engine, cfg ServerConfig) *Server {
 
 // Start begins accepting HTTP requests.
 func (s *Server) Start() error {
-	log.Printf("api: server starting on %s", s.server.Addr)
+	logger.Info("api: server starting", "addr", s.server.Addr)
 	err := s.server.ListenAndServe()
 	if err == http.ErrServerClosed {
 		return nil
@@ -193,7 +192,7 @@ func (s *Server) submitTask(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusConflict, "duplicate idempotency key")
 			return
 		}
-		if strings.Contains(err.Error(), "queue: buffer is full") {
+		if errors.Is(err, queue.ErrQueueFull) {
 			writeError(w, http.StatusServiceUnavailable, "queue at capacity")
 			return
 		}

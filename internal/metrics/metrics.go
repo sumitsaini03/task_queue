@@ -6,11 +6,13 @@ package metrics
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/sumitsaini/taskqueue/internal/logger"
 )
 
 // Metrics tracks operational counters and histograms.
@@ -125,21 +127,19 @@ func (m *Metrics) GetSnapshot() Snapshot {
 func (m *Metrics) LogSummary() {
 	snap := m.GetSnapshot()
 	data, _ := json.Marshal(snap)
-	log.Printf("metrics: %s", string(data))
+	logger.Info("metrics summary", "snapshot", string(data))
 }
 
 // percentiles calculates p50 and p99 from a slice of durations.
-// Not perfectly sorted (approximate), but good enough for monitoring.
 func percentiles(samples []time.Duration) (p50, p99 time.Duration) {
 	n := len(samples)
 	if n == 0 {
 		return 0, 0
 	}
 
-	// Copy and sort
 	sorted := make([]time.Duration, n)
 	copy(sorted, samples)
-	sortDurations(sorted)
+	slices.Sort(sorted)
 
 	p50 = sorted[n*50/100]
 	p99Idx := n * 99 / 100
@@ -148,19 +148,6 @@ func percentiles(samples []time.Duration) (p50, p99 time.Duration) {
 	}
 	p99 = sorted[p99Idx]
 	return
-}
-
-func sortDurations(d []time.Duration) {
-	// Simple insertion sort — good enough for capped 10k samples
-	for i := 1; i < len(d); i++ {
-		key := d[i]
-		j := i - 1
-		for j >= 0 && d[j] > key {
-			d[j+1] = d[j]
-			j--
-		}
-		d[j+1] = key
-	}
 }
 
 // PrometheusFormat exports metrics in Prometheus text exposition format.

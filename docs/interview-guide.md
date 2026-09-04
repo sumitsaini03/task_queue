@@ -102,3 +102,26 @@ Go channels (`chan *Task`) are built on mutexes and condition variables internal
 * **Capacity and Overflow:** Channel capacity is immutable once created with `make(chan T, cap)`. A ring buffer permits dynamically changing overflow policies (instant `OverflowReject` returning HTTP 503 vs `OverflowBlock`).
 * **Performance:** Our pre-allocated circular ring buffer avoids slice header manipulations and channel allocations, clocking **74.3M ops/sec with 0 heap allocations** single-threaded and **1.62M–4.65M ops/sec** under high multi-threaded contention.
 * **Blocking Semantics:** `sync.Cond` allows worker goroutines to sleep with zero CPU usage when the buffer is empty and broadcast wake-ups efficiently during batch appends.
+
+---
+
+## 5. CS Fundamentals to Production Mapping
+
+This table connects fundamental computer science concepts to their load-bearing production implementations in `taskqueue`:
+
+| Fundamental | Production Implementation | Component / Location |
+| :--- | :--- | :--- |
+| **Heaps / Priority Queues** | Delayed job scheduling ($O(\log N)$ push/pop, $O(1)$ peek) | `internal/queue/heap.go` |
+| **Hash Maps** | $O(1)$ task lookup, state inspection, deduplication | `internal/engine/engine.go` |
+| **Ring Buffers** | Bounded FIFO queue without slice reallocation | `internal/queue/ring.go` |
+| **OS Thread Scheduling** | Worker concurrency model with fixed goroutine pool | `internal/worker/pool.go` |
+| **Mutexes / Atomics / CAS** | Thread-safe state mutation, metrics collection | `internal/queue`, `internal/metrics` |
+| **Condition Variables** | Blocking/waking idle workers via `sync.Cond` | `internal/queue/ring.go` |
+| **Memory Model (Happens-Before)**| Concurrency correctness validated via race detector | `go test -race ./...` |
+| **Write-Ahead Logging** | Crash durability, ACID-like durability guarantees | `internal/wal/wal.go` |
+| **Log Compaction** | Bounded disk growth via atomic snapshot rotation | `internal/wal/snapshot.go` |
+| **Idempotency** | At-least-once delivery to effectively-once execution | `internal/engine/engine.go` |
+| **Backpressure & Load Shedding**| Bounded queue with 503 rejection under overload | `internal/queue/ring.go`, `internal/api` |
+| **Token Bucket** | Submission rate limiting (burst + sustained rate) | `internal/api/limiter.go` |
+| **Exponential Backoff + Full Jitter** | Distributed retry strategy preventing thundering herds | `internal/retry/backoff.go` |
+
