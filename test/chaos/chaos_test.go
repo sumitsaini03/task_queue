@@ -35,7 +35,7 @@ func TestChaos_KillProcessMidWriteAndRecover(t *testing.T) {
 	serverCmd.Env = append(os.Environ(),
 		"WAL_DIR="+walDir,
 		"HTTP_ADDR=127.0.0.1:8089",
-		"WAL_SYNC_POLICY=none",
+		"WAL_SYNC_POLICY=every",
 	)
 	if err := serverCmd.Start(); err != nil {
 		t.Fatalf("start server failed: %v", err)
@@ -128,7 +128,7 @@ func TestChaos_KillProcessMidWriteAndRecover(t *testing.T) {
 	restartCmd.Env = append(os.Environ(),
 		"WAL_DIR="+walDir,
 		"HTTP_ADDR=127.0.0.1:8089",
-		"WAL_SYNC_POLICY=none",
+		"WAL_SYNC_POLICY=every",
 	)
 	if err := restartCmd.Start(); err != nil {
 		t.Fatalf("restart server failed: %v", err)
